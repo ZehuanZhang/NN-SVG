@@ -122,8 +122,16 @@
                                 <input type="range" id="betweenSquares" name="" min="1" max="40" step="1" value="10" style="position: relative; top: 3px;">
                             </div>
                             <div>
+                                <label for="betweenLayersDefault">Between Layers Default</label>
+                                <input type="range" id="betweenLayersDefault" name="" min="-100" max="100" step="1" value="12" style="position: relative; top: 3px;">
+                            </div>
+                            <div>
+                                <label for="PolyWidth">Width of Poly Layer</label>
+                                <input type="range" id="polyWidth" name="" min="1" step="1" value="10" style="position: relative; top: 3px;">
+                            </div>
+                            <div>
                                 <label for="LayerLabelsFontsize">Layer Labels Fontsize</label>
-                                <input type="range" id="labelsFontsize" name="" min="1" max="40" step="1" value="10" style="position: relative; top: 3px;">
+                                <input type="range" id="labelsFontsize" name="" min="1" max="40" step="1" value="14" style="position: relative; top: 3px;">
                             </div>
                             <div>
                                 <input type="checkbox" id="showLabels" name="showLabels" value="showLabels" checked>
@@ -261,8 +269,8 @@ function restart() {
 
     architecture2 = $('#architecture2').find('input').map((i,el) => $(el).val()).get().filter(input => $.isNumeric(input)).map(s => parseInt(s));
 
-    lenet.redraw({'architecture_':architecture, 'architecture2_':architecture2});
-    lenet.redistribute({'betweenLayers_':betweenLayers});
+    lenet.redraw({'architecture_':architecture, 'architecture2_':architecture2, 'polyWidth_': parseInt($('#polyWidth').val())});
+    lenet.redistribute({'betweenLayers_':betweenLayers, 'betweenLayersDefault_':parseInt($('#betweenLayersDefault').val())});
 
 }
 
@@ -278,9 +286,10 @@ $("#borderWidth").change(    function () { lenet.style({'borderWidth_': parseFlo
 $("#borderHeight").change(    function () { lenet.style({'borderHeight': parseFloat(this.value)}); });
 $("#rectOpacity").change(    function () { lenet.style({'rectOpacity_': parseFloat(this.value)}); });
 $("#betweenSquares").change( function () { lenet.redistribute({'betweenSquares_': parseFloat(this.value)}); });
+$("#betweenLayersDefault").change( function (e) { e.preventDefault(); restart(); });
+$('#polyWidth').change(      function (e) { e.preventDefault();  restart();})
 $("#labelsFontsize").change(     function () { lenet.style({'labelsFontsize_': this.value}); });
 $("#showLabels").change(     function () { lenet.style({'showLabels_': this.checked}); });
-
 $("input[name='spacing']").change(function() {
     betweenLayers = $('#architecture').find('input[type="range"]').map((i,el) => $(el).val()).get().filter(input => $.isNumeric(input)).map(s => parseInt(s)); betweenLayers.pop();
     lenet.redistribute({'betweenLayers_':betweenLayers});

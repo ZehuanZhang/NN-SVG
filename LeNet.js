@@ -40,8 +40,9 @@ function LeNet() {
     var rectOpacity = 0.8;
     var betweenSquares = 8;
     var betweenLayers = [];
-    var betweenLayersDefault = 12;
-
+    var betweenLayersDefault = parseInt($('#betweenLayersDefault').val());
+    var polyWidth = 10;
+    
     // numberOfSquares, squareWidth, stride.
     var architecture = [];
     var lenet = {};
@@ -66,9 +67,12 @@ function LeNet() {
     /////////////////////////////////////////////////////////////////////////////
 
     function redraw({architecture_=architecture,
-                     architecture2_=architecture2}={}) {
+                     architecture2_=architecture2,
+                     polyWidth_ = polyWidth}={}) {
 
         architecture = architecture_;
+        architecture2 = architecture2_;
+        polyWidth = polyWidth_;
 
         lenet.rects = architecture.map((layer, layer_index) => range(layer['numberOfSquares']).map(rect_index => {return {'id':layer_index+'_'+rect_index,'layer':layer_index,'rect_index':rect_index,'side':layer['squareWidth'],'Height':layer['squareHeight']}}));
         lenet.rects = flatten(lenet.rects);
@@ -80,7 +84,7 @@ function LeNet() {
         lenet.conv_links = flatten(lenet.conv_links);
 
         lenet.fc_layers = architecture2.map((size, fc_layer_index) => {return {'id': 'fc_'+fc_layer_index, 'layer':fc_layer_index+architecture.length, 'size':size/Math.sqrt(2)}});
-        lenet.fc_links = lenet.fc_layers.map(fc => { return [Object.assign({'id':'link_'+fc['layer']+'_0','i':0,'prevSize':10},fc), Object.assign({'id':'link_'+fc['layer']+'_1','i':1,'prevSize':10},fc)]});
+        lenet.fc_links = lenet.fc_layers.map(fc => { return [Object.assign({'id':'link_'+fc['layer']+'_0','i':0,'prevSize':polyWidth},fc), Object.assign({'id':'link_'+fc['layer']+'_1','i':1,'prevSize':polyWidth},fc)]});
         lenet.fc_links = flatten(lenet.fc_links);
         lenet.fc_links[0]['prevSize'] = 0;                           // hacks
         lenet.fc_links[1]['prevSize'] = lenet.rects.last()['side'];  // hacks
@@ -169,11 +173,16 @@ function LeNet() {
     }
 
     function redistribute({betweenLayers_=betweenLayers,
-                           betweenSquares_=betweenSquares}={}) {
+                           betweenSquares_=betweenSquares,
+                           polyWidth_= polyWidth,
+                           betweenLayersDefault_ = betweenLayersDefault}={}
+                           ) {
 
         betweenLayers = betweenLayers_;
         betweenSquares = betweenSquares_;
-
+        polyWidth = polyWidth_;
+        betweenLayersDefault = betweenLayersDefault_;
+        
         layer_widths = architecture.map((layer, i) => (layer['numberOfSquares']-1) * betweenSquares + layer['squareWidth']);
         layer_widths = layer_widths.concat(lenet.fc_layers.map((layer, i) => layer['size']));
 
@@ -205,12 +214,13 @@ function LeNet() {
 
         poly.attr("points", function(d) {
             return ((layer_x_offsets[d.layer]+screen_center_x)           +','+(layer_y_offsets[d.layer]+screen_center_y)+
-                ' '+(layer_x_offsets[d.layer]+screen_center_x+10)        +','+(layer_y_offsets[d.layer]+screen_center_y)+
-                ' '+(layer_x_offsets[d.layer]+screen_center_x+d.size+10) +','+(layer_y_offsets[d.layer]+screen_center_y+d.size)+
+                ' '+(layer_x_offsets[d.layer]+screen_center_x+polyWidth)        +','+(layer_y_offsets[d.layer]+screen_center_y)+
+                ' '+(layer_x_offsets[d.layer]+screen_center_x+d.size+polyWidth) +','+(layer_y_offsets[d.layer]+screen_center_y+d.size)+
                 ' '+(layer_x_offsets[d.layer]+screen_center_x+d.size)    +','+(layer_y_offsets[d.layer]+screen_center_y+d.size));
         });
 
-        line.attr("x1", function(d) { return layer_x_offsets[d.layer-1] + (d.i ? 0 : layer_widths[d.layer-1]) + d.prevSize + screen_center_x})
+        line.attr("x1", function(d) { 
+        	return layer_x_offsets[d.layer-1] + (d.i ? 0 : layer_widths[d.layer-1]) + d.prevSize + screen_center_x})
             .attr("y1", function(d) { return layer_y_offsets[d.layer-1] + (d.i ? 0 : layer_widths[d.layer-1]) + screen_center_y})
             .attr("x2", function(d) { return layer_x_offsets[d.layer] + (d.i ? 0 : d.size) + screen_center_x})
             .attr("y2", function(d) { return layer_y_offsets[d.layer] + (d.i ? 0 : d.size) + screen_center_y});
