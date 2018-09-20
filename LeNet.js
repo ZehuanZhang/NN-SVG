@@ -47,9 +47,10 @@ function LeNet() {
     var lenet = {};
     var layer_offsets = [];
     var largest_layer_width = 0;
+    var labelsFontsize = 14;
     var showLabels = true;
 
-    let textFn = (layer) => (typeof(layer) === "object" ? layer['numberOfSquares']+'@'+layer['squareWidth']+'x'+layer['squareWidth'] : "1x"+layer)
+    let textFn = (layer) => (typeof(layer) === "object" ? layer['numberOfSquares']+'@'+layer['squareWidth']+'x'+layer['squareHeight'] : "1x"+layer)
 
     var rect = g.selectAll(".rect");
     var conv = g.selectAll(".conv");
@@ -69,7 +70,7 @@ function LeNet() {
 
         architecture = architecture_;
 
-        lenet.rects = architecture.map((layer, layer_index) => range(layer['numberOfSquares']).map(rect_index => {return {'id':layer_index+'_'+rect_index,'layer':layer_index,'rect_index':rect_index,'side':layer['squareWidth']}}));
+        lenet.rects = architecture.map((layer, layer_index) => range(layer['numberOfSquares']).map(rect_index => {return {'id':layer_index+'_'+rect_index,'layer':layer_index,'rect_index':rect_index,'side':layer['squareWidth'],'Height':layer['squareHeight']}}));
         lenet.rects = flatten(lenet.rects);
 
         lenet.convs = architecture.map((layer, layer_index) => Object.assign({'id':'conv_'+layer_index,'layer':layer_index}, layer)); lenet.convs.pop();
@@ -97,7 +98,7 @@ function LeNet() {
                    .attr("class", "rect")
                    .attr("id", function(d) { return d.id; })
                    .attr("width", function(d) { return d.side; })
-                   .attr("height", function(d) { return d.side; })
+                   .attr("height", function(d) { return d.Height; })
                    .merge(rect);
 
         conv = conv.data([]);
@@ -147,7 +148,7 @@ function LeNet() {
                    .text(function (d) { return (showLabels ? d.op : ""); })
                    .attr("class", "text")
                    .attr("dy", ".35em")
-                   .style("font-size", "16px")
+                   .style("font-size", labelsFontsize)
                    .attr("font-family", "sans-serif")
                    .merge(text);
 
@@ -159,7 +160,7 @@ function LeNet() {
                    .text(function (d) { return (showLabels ? d.text : ""); })
                    .attr("class", "info")
                    .attr("dy", "-0.3em")
-                   .style("font-size", "16px")
+                   .style("font-size", labelsFontsize)
                    .attr("font-family", "sans-serif")
                    .merge(info);
 
@@ -226,13 +227,15 @@ function LeNet() {
                     color2_=color2,
                     borderWidth_=borderWidth,
                     rectOpacity_=rectOpacity,
+                    labelsFontsize_=labelsFontsize,
                     showLabels_=showLabels}={}) {
         color1      = color1_;
         color2      = color2_;
         borderWidth = borderWidth_;
         rectOpacity = rectOpacity_;
         showLabels  = showLabels_;
-
+        labelsFontsize = labelsFontsize_;
+        
         rect.style("fill", function(d) { return d.rect_index % 2 ? color1 : color2});
         poly.style("fill", color1);
 
@@ -256,6 +259,8 @@ function LeNet() {
 
         text.text(function (d) { return (showLabels ? d.op : ""); });
         info.text(function (d) { return (showLabels ? d.text : ""); });
+        info.style("font-size", labelsFontsize);
+        text.style("font-size", labelsFontsize);
     }
 
     /////////////////////////////////////////////////////////////////////////////

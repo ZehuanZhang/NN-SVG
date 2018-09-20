@@ -30,11 +30,13 @@
         }
 
         .nn-picker {
-            width: 410px;
+            width: 450px;
             margin: 30px;
             z-index: 1000;
         }
-
+        .UpdateButton {
+            left: 20px;
+        }
         [data-toggle="collapse"] .fa:before {
             font-size: 2rem;
             color: black;
@@ -54,6 +56,7 @@
         input[type="range"] {
             margin-left: 10px;
         }
+        
         #count {
             position: fixed;
             bottom: 0;
@@ -119,6 +122,10 @@
                                 <input type="range" id="betweenSquares" name="" min="1" max="40" step="1" value="10" style="position: relative; top: 3px;">
                             </div>
                             <div>
+                                <label for="LayerLabelsFontsize">Layer Labels Fontsize</label>
+                                <input type="range" id="labelsFontsize" name="" min="1" max="40" step="1" value="10" style="position: relative; top: 3px;">
+                            </div>
+                            <div>
                                 <input type="checkbox" id="showLabels" name="showLabels" value="showLabels" checked>
                                 <label for="showLabels">Show Layer Labels</label>
                             </div>
@@ -126,12 +133,13 @@
                             <hr>
                             <h4>Architecture:</h4>
                             <div id="architecture">
-                                <p># Feature-Maps | fMap Size | Filter Size</p>
+                                <p># Feature-Maps | Width | Height | Filter Size</p>
                                 <div class="row entry">
                                     <div class="input-group mb-2 mr-sm-2 col-10">
                                         <button class="btn btn-secondary btn-remove input-group-prepend"><span class="fa fa-minus"></span></button>
                                         <input type="number" class="form-control" name="numberOfSquares" step="1" value="8" />
                                         <input type="number" class="form-control" name="squareWidth" step="1" value="128" />
+                                        <input type="number" class="form-control" name="squareHeight" step="1" value="128" />
                                         <input type="number" class="form-control" name="stride" step="1" value="8" />
                                     </div>
                                     <div class="input-group mb-2 mr-sm-2 col-10">
@@ -145,6 +153,7 @@
                                         <button class="btn btn-secondary btn-remove input-group-prepend"><span class="fa fa-minus"></span></button>
                                         <input type="number" class="form-control" name="numberOfSquares" step="1" value="8" />
                                         <input type="number" class="form-control" name="squareWidth" step="1" value="64" />
+                                        <input type="number" class="form-control" name="squareHeight" step="1" value="64" />
                                         <input type="number" class="form-control" name="stride" step="1" value="16" />
                                     </div>
                                     <div class="input-group mb-2 mr-sm-2 col-10">
@@ -158,6 +167,7 @@
                                         <button class="btn btn-secondary btn-remove input-group-prepend"><span class="fa fa-minus"></span></button>
                                         <input type="number" class="form-control" name="numberOfSquares" step="1" value="24" />
                                         <input type="number" class="form-control" name="squareWidth" step="1" value="48" />
+                                        <input type="number" class="form-control" name="squareHeight" step="1" value="48" />
                                         <input type="number" class="form-control" name="stride" step="1" value="8" />
                                     </div>
                                     <div class="input-group mb-2 mr-sm-2 col-10">
@@ -171,6 +181,7 @@
                                         <button class="btn btn-secondary btn-remove input-group-prepend"><span class="fa fa-minus"></span></button>
                                         <input type="number" class="form-control" name="numberOfSquares" step="1" value="24" />
                                         <input type="number" class="form-control" name="squareWidth" step="1" value="16" />
+                                        <input type="number" class="form-control" name="squareHeight" step="1" value="16" />
                                         <input type="number" class="form-control" name="stride" step="1" value="8" />
                                     </div>
                                     <div class="input-group mb-2 mr-sm-2 col-10">
@@ -184,6 +195,7 @@
                                         <button class="btn btn-primary btn-add input-group-prepend"><span class="fa fa-plus"></span></button>
                                         <input type="number" class="form-control" name="numberOfSquares" step="1"/>
                                         <input type="number" class="form-control" name="squareWidth" step="1"/>
+                                        <input type="number" class="form-control" name="squareHeight" step="1"/>
                                         <input type="number" class="form-control" name="stride" step="1"/>
                                     </div>
                                     <div class="input-group mb-2 mr-sm-2 col-10">
@@ -216,9 +228,7 @@
                                         <input type="number" class="form-control" name="vectorLength" step="1"/>
                                     </div>
                                 </div>
-
                             </div>
-
                         </div>
 
                 </div>
@@ -247,7 +257,7 @@ function restart() {
     betweenLayers = $('#architecture').find('input[type="range"]').map((i,el) => $(el).val()).get().filter(input => $.isNumeric(input)).map(s => parseInt(s)); betweenLayers.pop();
 
     let range = n => [...Array(n).keys()];
-    architecture = range(architecture.length / 3).map(i => architecture.slice(3*i, 3*i+3)).map((l) => {return {'numberOfSquares':l[0],'squareWidth':l[1],'stride':l[2]}});
+    architecture = range(architecture.length / 4).map(i => architecture.slice(4*i, 4*i+4)).map((l) => {return {'numberOfSquares':l[0],'squareWidth':l[1],'squareHeight':l[2],'stride':l[3]}});
 
     architecture2 = $('#architecture2').find('input').map((i,el) => $(el).val()).get().filter(input => $.isNumeric(input)).map(s => parseInt(s));
 
@@ -265,8 +275,10 @@ restart();
 $("#color1").change(         function () { lenet.style({'color1_': this.value}); });
 $("#color2").change(         function () { lenet.style({'color2_': this.value}); });
 $("#borderWidth").change(    function () { lenet.style({'borderWidth_': parseFloat(this.value)}); });
+$("#borderHeight").change(    function () { lenet.style({'borderHeight': parseFloat(this.value)}); });
 $("#rectOpacity").change(    function () { lenet.style({'rectOpacity_': parseFloat(this.value)}); });
 $("#betweenSquares").change( function () { lenet.redistribute({'betweenSquares_': parseFloat(this.value)}); });
+$("#labelsFontsize").change(     function () { lenet.style({'labelsFontsize_': this.value}); });
 $("#showLabels").change(     function () { lenet.style({'showLabels_': this.checked}); });
 
 $("input[name='spacing']").change(function() {
